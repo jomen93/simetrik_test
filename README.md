@@ -1,55 +1,55 @@
 # Simetrik Incident Detection Agent 🕵️‍♂️📊
 
-## Visión General del Negocio
+## Business Overview
 
-El **Simetrik Incident Detection Agent** es una solución automatizada de aseguramiento de calidad de datos (Data Quality Assurance) diseñada para monitorear, detectar y reportar anomalías en los procesos de ingesta de datos financieros y operativos.
+The **Simetrik Incident Detection Agent** is an automated Data Quality Assurance solution designed to monitor, detect, and report anomalies in financial and operational data ingestion processes.
 
-Su objetivo principal es **reducir el tiempo de detección de incidentes** (MTTD) y eliminar la necesidad de revisión manual de miles de archivos diarios. El agente actúa como un analista experto que trabaja 24/7, validando que la información recibida cumpla con los patrones históricos y las reglas de negocio esperadas.
+Its primary objective is to **reduce the Mean Time To Detect (MTTD)** incidents and eliminate the need for manual review of thousands of daily files. The agent acts as an expert analyst working 24/7, validating that received information complies with historical patterns and expected business rules.
 
-### Valor Agregado
-- **Proactividad:** Detecta archivos faltantes o vacíos antes de que afecten los procesos de conciliación.
-- **Precisión Híbrida:** Combina reglas determinísticas estrictas (código) con razonamiento contextual (IA/LLM) para reducir falsos positivos.
-- **Transparencia:** Genera reportes detallados con evidencia, recomendaciones y costos de ejecución.
+### Value Proposition
+- **Proactivity:** Detects missing or empty files before they affect reconciliation processes.
+- **Hybrid Precision:** Combines strict deterministic rules (code) with contextual reasoning (AI/LLM) to reduce false positives.
+- **Transparency:** Generates detailed reports with evidence, recommendations, and execution costs.
 
 ---
 
-## Arquitectura e Infraestructura
+## Architecture & Infrastructure
 
-El sistema opera bajo una arquitectura modular basada en microservicios (vía API REST) y el patrón de diseño **ReAct (Reasoning + Acting)** para su modo agéntico.
+The system operates under a modular microservices-based architecture (via REST API) and uses the **ReAct (Reasoning + Acting)** design pattern for its agentic mode.
 
-### Flujo de Razonamiento del Agente
+### Agent Reasoning Flow
 
-Este diagrama detalla cómo el agente "piensa" y utiliza las herramientas deterministas para llegar a una conclusión.
+This diagram details how the agent "thinks" and uses deterministic tools to reach a conclusion.
 
 ```mermaid
 graph TD
-    Start([🚀 Inicio: Solicitud API]) --> Init[Inicializar Agente ReAct]
-    Init --> Goal[Objetivo: Analizar Calidad de Datos]
+    Start([🚀 Start: API Request]) --> Init[Initialize ReAct Agent]
+    Init --> Goal[Goal: Analyze Data Quality]
 
-    subgraph Loop ["Ciclo de Razonamiento (ReAct Loop)"]
-        Goal --> Thought[🧠 Pensamiento: ¿Qué debo hacer?]
-        Thought --> Decision{¿Tengo suficiente info?}
+    subgraph Loop ["Reasoning Cycle (ReAct Loop)"]
+        Goal --> Thought[🧠 Thought: What should I do?]
+        Thought --> Decision{Enough info?}
         
-        Decision -- No --> Action[🛠️ Acción: Seleccionar Herramienta]
+        Decision -- No --> Action[🛠️ Action: Select Tool]
         
-        subgraph Tools ["Ejecución de Herramientas"]
-            Action -- scan_day_incidents --> T1[Escaneo Global]
-            Action -- check_anomalies --> T2[Revisión Fuente]
-            Action -- get_cv_rules --> T3[Consultar Reglas]
+        subgraph Tools ["Tool Execution"]
+            Action -- scan_day_incidents --> T1[Global Scan]
+            Action -- check_anomalies --> T2[Source Check]
+            Action -- get_cv_rules --> T3[Get Rules]
             
-            T1 -.-> PyCode[[🐍 Detectores Python]]
+            T1 -.-> PyCode[[🐍 Python Detectors]]
             T2 -.-> PyCode
             T3 -.-> PyCode
             PyCode <--> DB[(📂 Filesystem)]
         end
         
-        PyCode --> Obs[👀 Observación]
+        PyCode --> Obs[👀 Observation]
         Obs --> Thought
     end
     
-    Decision -- Sí --> Final[📝 Respuesta Final]
-    Final --> Report[Generar JSON Estructurado]
-    Report --> End([🏁 Fin del Proceso])
+    Decision -- Yes --> Final[📝 Final Answer]
+    Final --> Report[Generate Structured JSON]
+    Report --> End([🏁 End Process])
 
     style Thought fill:#f9f,stroke:#333,stroke-width:2px
     style PyCode fill:#bbf,stroke:#333,stroke-width:2px
@@ -58,78 +58,78 @@ graph TD
 
 ---
 
-## Componentes Clave
+## Key Components
 
-### 1. El Concepto de "CV" (Curriculum Vitae de la Fuente)
-Cada fuente de datos (ej. un banco, un procesador de pagos) tiene un "CV". Este es un archivo de configuración inteligente que define la "personalidad" y comportamiento esperado de la fuente:
-- **Horarios de carga:** ¿A qué hora deben llegar los archivos?
-- **Volumen esperado:** ¿Cuántos registros son normales un lunes vs. un domingo?
-- **Entidades:** ¿Qué sub-entidades (ej. "Uber", "Rappi") deben estar presentes?
+### 1. The "CV" Concept (Source Curriculum Vitae)
+Each data source (e.g., a bank, a payment processor) has a "CV". This is a smart configuration file that defines the "personality" and expected behavior of the source:
+- **Upload Schedules:** What time should files arrive?
+- **Expected Volume:** How many records are normal on a Monday vs. a Sunday?
+- **Entities:** Which sub-entities (e.g., "Uber", "Rappi") must be present?
 
-### 2. Detectores Especializados
-El agente cuenta con "sentidos" específicos para diferentes tipos de problemas:
-- **MissingFileDetector:** Alerta si no llegan archivos esperados (Criticidad: **URGENTE**).
-- **UnexpectedVolumeVariationDetector:** Alerta si el volumen de filas sube o baja drásticamente (Criticidad: **NEEDS_ATTENTION**).
-- **UnexpectedEmptyFileDetector:** Alerta si llegan archivos vacíos cuando no deberían.
-- **LateUploadDetector:** Alerta si los archivos llegan fuera de la ventana de tiempo.
-- **DuplicatedFailedFileDetector:** Detecta duplicados o cargas fallidas.
+### 2. Specialized Detectors
+The agent has specific "senses" for different types of problems:
+- **MissingFileDetector:** Alerts if expected files do not arrive (Criticality: **URGENT**).
+- **UnexpectedVolumeVariationDetector:** Alerts if row volume drops or spikes drastically (Criticality: **NEEDS_ATTENTION**).
+- **UnexpectedEmptyFileDetector:** Alerts if empty files arrive when they shouldn't.
+- **LateUploadDetector:** Alerts if files arrive outside the time window.
+- **DuplicatedFailedFileDetector:** Detects duplicates or failed uploads.
 
-### 3. Modo Agéntico (ReAct)
-En este modo, el sistema no solo sigue reglas, sino que **piensa**:
-1.  **Observa:** Escanea el estado del día.
-2.  **Razona:** "Veo que faltan archivos de la fuente X, pero es feriado, voy a verificar el calendario".
-3.  **Actúa:** Ejecuta herramientas para profundizar en el análisis.
-4.  **Concluye:** Genera un resumen ejecutivo en lenguaje natural explicando la situación.
+### 3. Agentic Mode (ReAct)
+In this mode, the system doesn't just follow rules, it **thinks**:
+1.  **Observes:** Scans the day's status.
+2.  **Reasons:** "I see missing files for source X, but it's a holiday, let me check the calendar."
+3.  **Acts:** Executes tools to deepen the analysis.
+4.  **Concludes:** Generates an executive summary in natural language explaining the situation.
 
 ---
 
-## Lógica de Negocio y Clasificación
+## Business Logic & Classification
 
-El agente clasifica el estado de cada fuente basándose en el "Peor Caso Encontrado":
+The agent classifies the status of each source based on the "Worst Case Found":
 
-| Estado | Descripción | Acción Recomendada |
+| Status | Description | Recommended Action |
 | :--- | :--- | :--- |
-| 🔴 **URGENT** | Incidente crítico que detiene la operación (ej. Faltan archivos, Archivos vacíos). | **Intervención Inmediata:** Re-procesar o contactar al proveedor. |
-| 🟡 **NEEDS_ATTENTION** | Anomalía estadística (ej. Volumen bajo, Llegada tardía). No detiene el proceso pero indica riesgo. | **Revisión:** Validar si es un comportamiento de mercado o error técnico. |
-| 🟢 **ALL_GOOD** | Todos los archivos llegaron en tiempo y forma según su CV. | Ninguna. |
+| 🔴 **URGENT** | Critical incident stopping operation (e.g., Missing files, Empty files). | **Immediate Intervention:** Re-process or contact provider. |
+| 🟡 **NEEDS_ATTENTION** | Statistical anomaly (e.g., Low volume, Late arrival). Does not stop process but indicates risk. | **Review:** Validate if it's market behavior or technical error. |
+| 🟢 **ALL_GOOD** | All files arrived on time and form according to their CV. | None. |
 
 ---
 
-## Flujo de Trabajo Típico
+## Typical Workflow
 
-1.  **Trigger:** El sistema de orquestación invoca la API del agente (`POST /analyze`) para una fecha específica (ej. `2025-09-09`).
-2.  **Carga de Contexto:** El agente lee los metadatos de los archivos recibidos ese día y carga los CVs de las fuentes activas.
-3.  **Análisis:**
-    *   Calcula estadísticas (Total de filas, Archivos procesados).
-    *   Ejecuta los detectores contra las reglas del CV.
-4.  **Consolidación:** Agrupa los incidentes por fuente y determina la severidad global.
-5.  **Respuesta:** Devuelve un JSON estructurado con:
-    *   Resumen ejecutivo.
-    *   Lista detallada de incidentes.
-    *   Estadísticas de consumo (Tokens/Costo).
+1.  **Trigger:** The orchestration system invokes the Agent API (`POST /analyze`) for a specific date (e.g., `2025-09-09`).
+2.  **Context Loading:** The agent reads metadata of received files for that day and loads active source CVs.
+3.  **Analysis:**
+    *   Calculates statistics (Total rows, Processed files).
+    *   Executes detectors against CV rules.
+4.  **Consolidation:** Groups incidents by source and determines global severity.
+5.  **Response:** Returns a structured JSON with:
+    *   Executive summary.
+    *   Detailed list of incidents.
+    *   Consumption statistics (Tokens/Cost).
 
-## Stack Tecnológico
+## Tech Stack
 
-- **Lenguaje:** Python 3.12
+- **Language:** Python 3.12
 - **API Framework:** FastAPI
 - **LLM Integration:** OpenAI (GPT-4o / GPT-4o-mini)
-- **Arquitectura:** Modular / Clean Architecture
-- **Despliegue:** Docker & Docker Compose
+- **Architecture:** Modular / Clean Architecture
+- **Deployment:** Docker & Docker Compose
 
-## Ejecución con Docker
+## Docker Execution
 
-Para levantar el agente en un entorno aislado:
+To run the agent in an isolated environment:
 
-1.  **Configurar API Key:**
-    Crea un archivo `.env` en la raíz del proyecto (o usa el que ya existe) y define tu clave:
+1.  **Configure API Key:**
+    Create a `.env` file in the project root (or use the existing one) and define your key:
     ```bash
     OPENAI_API_KEY=sk-proj-...
     ```
 
-2.  **Levantar Servicios:**
+2.  **Start Services:**
     ```bash
     docker-compose up --build
     ```
 
-3.  **Probar:**
-    El agente estará disponible en `http://localhost:8005/analyze`.
+3.  **Test:**
+    The agent will be available at `http://localhost:8005/analyze`.
